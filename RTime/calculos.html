@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      width: 800px;
+      background-color: #f0f0f0;
+      border: 2px solid darkgreen;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      max-height: 600px;
+    }
+
+    .form-group {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .form-group input[type="file"],
+    .form-group input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      max-width: 300px;
+    }
+
+    .btn-container {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .btn {
+      flex: 1;
+      background-color: darkgreen;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Estilo para la tabla */
+    table {
+      width: 100%;
+    }
+
+    th, td {
+      width: 20%;
+      text-align: center;
+    }
+  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Horas de Desarrolladores</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-4">Registro de Horas de Desarrolladores</h1>
+
+        <div class="row">
+            <!-- Contenedor Principal -->
+            <div class="col-md-6">
+                <form id="registroHorasForm" class="mt-4">
+                    <div class="form-group">
+                        <label for="nombreDesarrollador">Nombre del Desarrollador:</label>
+                        <select id="nombreDesarrollador" class="form-control form-control-sm" style="max-width: 200px;">
+                            <option value="Dante Martinez">Dante Martinez</option>
+                            <option value="Andres Winckler">Andres Winckler</option>
+                            <option value="Daniel Herrero">Daniel Herrero</option>
+                            <option value="Dario Carrizo">Dario Carrizo</option>
+                        </select>
+                        <label for="diaTrabajo">(Mes y Día):</label>
+                        <input type="date" id="diaTrabajo" class="form-control form-control-sm" style="max-width: 150px;">
+                    </div>
+                    <div class="form-group">
+                        <label for="horaTrabajo">Horas de Trabajo:</label>
+                        <input type="number" id="horaTrabajo" class="form-control form-control-sm" style="max-width: 90px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nombreProyecto">Nombre del proyecto:</label>
+                        <input type="text" id="nombreProyecto" class="form-control form-control-sm" style="max-width: 200px">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="valorHoraProyecto">Valor de hora de proyecto actual:</label>
+                        <select id="valorHoraProyecto" class="form-control form-control-sm" style="max-width: 90px;" onchange="habilitarCamposProyecto()">
+                            <option value="3000">$3000</option>
+                            <option value="5000">$5000</option>
+                            <option value="7000">$7000</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="agregarRegistro()">Guardar</button>
+                </form>
+
+                <table class="table mt-4">
+                    <thead>
+                        <tr>
+                            <th>Nombre del Desarrollador</th>
+                            <th>Fecha de Trabajo</th>
+                            <th>Horas de Trabajo</th>
+                            <th>Valor de Horas</th>
+                            <th>Total de Horas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrosBody">
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-danger" onclick="limpiarCampos()">Limpiar Campos del Proyecto</button>
+            </div>
+
+            <!-- Contenedor para Total de Horas del Proyecto y Costo Total del Proyecto -->
+            <div class="col-md-6">
+                <div class="info-container mt-4">
+                    <div>
+                        <strong>Total de Horas del Proyecto:</strong>
+                        <span id="horasProyectoTotal">0</span>
+                    </div>
+
+                    <div class="mt-3">
+                        <strong>Costo Total del Proyecto:</strong>
+                        <span id="costoProyectoTotal">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            const password = prompt('Ingrese la contraseña para inspeccionar:');
+
+            if (password === 'gatuno22') {
+                return; // Permite la inspección si la contraseña es correcta
+            } else {
+                alert('Contraseña incorrecta. No se permite la inspección.');
+            }
+        });
+
+        let valorHoraTrabajo = 7000; // Valor de la hora por defecto para los desarrolladores
+        let nombreProyecto = '';
+        let camposProyectoHabilitados = true;
+
+        const valorHoraProyectoInput = document.getElementById("valorHoraProyecto");
+        const nombreProyectoInput = document.getElementById("nombreProyecto");
+
+        // Cargar registros desde localStorage al cargar la página
+        let registros = [];
+
+        if (localStorage.getItem("registros")) {
+            registros = JSON.parse(localStorage.getItem("registros"));
+            actualizarTabla();
+            calcularCostoProyectoTotal();
+        }
+
+        function agregarRegistro() {
+            const nombreDesarrollador = document.getElementById("nombreDesarrollador").value;
+            const diaTrabajo = document.getElementById("diaTrabajo").value;
+            const horaTrabajo = parseFloat(document.getElementById("horaTrabajo").value);
+            const valorHoraProyecto = parseFloat(valorHoraProyectoInput.value.replace('$', ''));
+            const nombreProyecto = nombreProyectoInput.value;
+
+            if (isNaN(valorHoraProyecto)) {
+                alert("Por favor, ingrese un valor válido para la hora de trabajo.");
+                return;
+            }
+
+            if (valorHoraProyecto !== "" && nombreProyecto !== "") {
+                valorHoraProyectoInput.disabled = true;
+                nombreProyectoInput.disabled = true;
+            }
+
+            registros.push({
+                nombreDesarrollador,
+                diaTrabajo,
+                horaTrabajo,
+                valorHoraProyecto,
+                nombreProyecto,
+            });
+
+            actualizarTabla();
+            calcularCostoProyectoTotal();
+
+            // Almacenar los registros en localStorage
+            localStorage.setItem("registros", JSON.stringify(registros));
+        }
+
+        function actualizarTabla() {
+            const registrosBody = document.getElementById("registrosBody");
+            registrosBody.innerHTML = '';
+
+            registros.forEach(registro => {
+                const costoHoras = registro.horaTrabajo * registro.valorHoraProyecto;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${registro.nombreDesarrollador}</td>
+                    <td>${registro.diaTrabajo}</td>
+                    <td>${registro.horaTrabajo}</td>
+                    <td>$${registro.valorHoraProyecto}</td>
+                    <td>${costoHoras}</td>
+                `;
+                registrosBody.appendChild(row);
+            });
+
+            // Almacenar los registros en localStorage
+            localStorage.setItem("registros", JSON.stringify(registros));
+
+            // Llama a la función para calcular el total de horas del proyecto
+            calcularHorasProyectoTotal();
+        }
+
+        function calcularCostoProyectoTotal() {
+            const costoProyectoTotal = registros.reduce((total, registro) => total + (registro.horaTrabajo * registro.valorHoraProyecto), 0);
+            document.getElementById("costoProyectoTotal").textContent = costoProyectoTotal;
+        }
+
+        function calcularHorasProyectoTotal() {
+            const horasProyectoTotal = registros.reduce((total, registro) => total + registro.horaTrabajo, 0);
+            document.getElementById("horasProyectoTotal").textContent = horasProyectoTotal;
+        }
+
+        function limpiarCampos() {
+            const clave = prompt("Ingrese la contraseña para limpiar los campos del proyecto:");
+
+            if (clave === "catecumeno") {
+                registros = [];
+                actualizarTabla();
+                calcularCostoProyectoTotal();
+                valorHoraProyectoInput.disabled = false;
+                nombreProyectoInput.disabled = false;
+                valorHoraProyectoInput.value = '3000';
+                nombreProyectoInput.value = '';
+            } else {
+                alert("La contraseña no es correcta. Los datos no se borrarán.");
+            }
+        }
+
+        function habilitarCamposProyecto() {
+            if (camposProyectoHabilitados) {
+                valorHoraProyectoInput.disabled = true;
+                nombreProyectoInput.disabled = true;
+            } else {
+                valorHoraProyectoInput.disabled = false;
+                nombreProyectoInput.disabled = false;
+            }
+        }
+    </script>
+
+    <!-- Scripts externos -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

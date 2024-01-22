@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      width: 500px;
+      height: 500px;
+      background-color: #f0f0f0;
+      border: 2px solid darkgreen;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .form-group {
+      text-align: center;
+      margin-bottom: 15px; /* Aumentar el espacio entre los grupos de formulario */
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .form-group input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      max-width: 300px;
+    }
+
+    .btn-container {
+      width: 100%;
+      text-align: center; /* Centra los botones */
+    }
+
+    .btn {
+      width: 100%; /* Misma medida que las cajas de texto */
+      padding: 10px;
+      max-width: 200px;
+      background-color: darkgreen;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 15px; /* Espacio de 15px entre los botones */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Control de Horas</h1>
+    <div class="form-group">
+      <label for="usuario">Usuario:</label>
+      <input type="text" id="usuario" name="usuario" required>
+    </div>
+    <div class="form-group">
+      <label for="contrasena">Contraseña:</label>
+      <input type="password" id="contrasena" name="contrasena" required>
+    </div>
+    <div class="btn-container">
+      <button class="btn" onclick="ingresar()">Ingresar</button>
+    </div>
+  </div>
+
+  <script>
+    // Limpia los campos de usuario y contraseña por defecto
+    document.getElementById("usuario").value = "";
+    document.getElementById("contrasena").value = "";
+
+    function ingresar() {
+      const usuario = document.getElementById("usuario").value;
+      const contrasena = document.getElementById("contrasena").value;
+
+      // Validación de usuario y contraseña
+      const usuariosValidos = ["Winckler", "Herrero", "Martinez", "Carrizo"];
+      const contrasenaValida = "23&&91()56";
+
+      if (usuariosValidos.includes(usuario) && contrasena === contrasenaValida) {
+        // Redirige a "calculos.html"
+        window.open('calculos.html', '_self');
+      } else {
+        alert("Usuario o contraseña incorrectos. Por favor, inténtelo de nuevo.");
+      }
+    }
+  </script>
+</body>
+</html>

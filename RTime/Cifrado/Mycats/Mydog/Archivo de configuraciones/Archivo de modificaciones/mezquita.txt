@@ -1,0 +1,6 @@
+   Para ingresar desde el index se debe poner en la seccion usuario se debe ingresar
+   el apellido de uno de los usuarios, y la clave "23&&91()56"  
+
+   Para podere borrar los campos del proyecto se debe ingresar la clave "catecumeno"
+
+  Para poder inspeccionar el archivo se debe ingresar la clave "gatuno22"
